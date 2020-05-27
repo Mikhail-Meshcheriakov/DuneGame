@@ -25,7 +25,7 @@ public class GameController {
         Assets.getInstance().loadAssets();
         this.map = new BattleMap();
         this.projectilesController = new ProjectilesController(this);
-        this.tank = new Tank(this, 200, 200);;
+        this.tank = new Tank(this, 200, 200);
     }
 
     public void update(float dt) {
@@ -35,5 +35,12 @@ public class GameController {
     }
 
     public void checkCollisions(float dt) {
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (tank.getPosition().dst(i * 80 + 40, j * 80 + 40) < 32 && map.getData()[i][j] != 0) {
+                    map.getData()[i][j] = 0;
+                }
+            }
+        }
     }
 }
