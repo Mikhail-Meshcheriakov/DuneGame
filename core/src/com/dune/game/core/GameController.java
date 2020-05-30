@@ -38,5 +38,6 @@ public class GameController {
     }
 
     public void checkCollisions(float dt) {
+        tanksController.checkCollisions(dt);
     }
 }

@@ -2,10 +2,9 @@ package com.dune.game.core;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 public class Tank extends GameObject implements Poolable {
@@ -26,6 +25,10 @@ public class Tank extends GameObject implements Poolable {
     private float moveTimer;
     private float timePerFrame;
     private int container;
+    private int containerCapacity;
+    private boolean selected;
+    private boolean obstacle;
+    private BitmapFont font16;
 
     @Override
     public boolean isActive() {
@@ -40,13 +43,17 @@ public class Tank extends GameObject implements Poolable {
     }
 
     public void setup(Owner ownerType, float x, float y) {
-        this.textures = Assets.getInstance().getAtlas().findRegion("tankanim").split(64,64)[0];
+        this.textures = Assets.getInstance().getAtlas().findRegion("tankanim").split(64, 64)[0];
         this.position.set(x, y);
         this.ownerType = ownerType;
         this.speed = 120.0f;
         this.hp = 100;
         this.weapon = new Weapon(Weapon.Type.HARVEST, 3.0f, 1);
         this.destination = new Vector2(position);
+        this.selected = false;
+        this.obstacle = false;
+        this.containerCapacity = 50;
+        this.font16 = Assets.getInstance().getAssetManager().get("fonts/font16.ttf");
     }
 
     private int getCurrentFrameIndex() {
@@ -54,53 +61,70 @@ public class Tank extends GameObject implements Poolable {
     }
 
     public void update(float dt) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            selected = position.dst(Gdx.input.getX(), 720 - Gdx.input.getY()) <= 30.0f;
+        }
+
         if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-            destination.set(Gdx.input.getX(), 720 - Gdx.input.getY());
+            if (selected) {
+                destination.set(Gdx.input.getX(), 720 - Gdx.input.getY());
+            }
         }
         if (position.dst(destination) > 3.0f) {
-            float angleTo = tmp.set(destination).sub(position).angle();
-            if (Math.abs(angle - angleTo) > 3.0f) {
-                if (angle > angleTo) {
-                    if (Math.abs(angle - angleTo) <= 180.0f) {
-                        angle -= rotationSpeed * dt;
+            if (!obstacle) {
+                float angleTo = tmp.set(destination).sub(position).angle();
+                if (Math.abs(angle - angleTo) > 3.0f) {
+                    if (angle > angleTo) {
+                        if (Math.abs(angle - angleTo) <= 180.0f) {
+                            angle -= rotationSpeed * dt;
+                        } else {
+                            angle += rotationSpeed * dt;
+                        }
                     } else {
-                        angle += rotationSpeed * dt;
-                    }
-                } else {
-                    if (Math.abs(angle - angleTo) <= 180.0f) {
-                        angle += rotationSpeed * dt;
-                    } else {
-                        angle -= rotationSpeed * dt;
+                        if (Math.abs(angle - angleTo) <= 180.0f) {
+                            angle += rotationSpeed * dt;
+                        } else {
+                            angle -= rotationSpeed * dt;
+                        }
                     }
                 }
-            }
-            if (angle < 0.0f) {
-                angle += 360.0f;
-            }
-            if (angle > 360.0f) {
-                angle -= 360.0f;
-            }
+                if (angle < 0.0f) {
+                    angle += 360.0f;
+                }
+                if (angle > 360.0f) {
+                    angle -= 360.0f;
+                }
 
-            moveTimer += dt;
-            tmp.set(speed, 0).rotate(angle);
-            position.mulAdd(tmp, dt);
-            if (position.dst(destination) < 120.0f && Math.abs(angleTo - angle) > 10) {
-                position.mulAdd(tmp, -dt);
+                moveTimer += dt;
+                tmp.set(speed, 0).rotate(angle);
+                position.mulAdd(tmp, dt);
+                if (position.dst(destination) < 120.0f && Math.abs(angleTo - angle) > 10) {
+                    position.mulAdd(tmp, -dt);
+                }
+            } else if (position.dst(destination) > 140.0f) {
+                angle += rotationSpeed * dt;
+                obstacle = false;
+            } else {
+                destination.set(position);
+                obstacle = false;
             }
         }
+
         updateWeapon(dt);
         checkBounds();
     }
 
     public void updateWeapon(float dt) {
-        if (weapon.getType() == Weapon.Type.HARVEST) {
-            if (gc.getMap().getResourceCount(this) > 0) {
-                int result = weapon.use(dt);
-                if (result > -1) {
-                    container += gc.getMap().harvestResource(this, result);
+        if (container < containerCapacity) {
+            if (weapon.getType() == Weapon.Type.HARVEST) {
+                if (gc.getMap().getResourceCount(this) > 0) {
+                    int result = weapon.use(dt);
+                    if (result > -1) {
+                        container += gc.getMap().harvestResource(this, result);
+                    }
+                } else {
+                    weapon.reset();
                 }
-            } else {
-                weapon.reset();
             }
         }
     }
@@ -122,12 +146,20 @@ public class Tank extends GameObject implements Poolable {
 
     public void render(SpriteBatch batch) {
         batch.draw(textures[getCurrentFrameIndex()], position.x - 40, position.y - 40, 40, 40, 80, 80, 1, 1, angle);
+        font16.draw(batch, String.valueOf(container), position.x - 44, position.y + 44, 0, 1, false);
         if (weapon.getType() == Weapon.Type.HARVEST && weapon.getUsageTimePercentage() > 0.0f) {
             batch.setColor(0.2f, 0.2f, 0.0f, 1.0f);
             batch.draw(progressbarTexture, position.x - 32, position.y + 30, 64, 12);
             batch.setColor(1.0f, 1.0f, 0.0f, 1.0f);
             batch.draw(progressbarTexture, position.x - 30, position.y + 32, 60 * weapon.getUsageTimePercentage(), 8);
             batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        }
+    }
+
+    public void obstacleDetour(Vector2 positionObstacle, float dt) {
+        obstacle = true;
+        if (Math.abs(angle - tmp.set(positionObstacle).sub(position).angle()) > 90) {
+            obstacle = false;
         }
     }
 }

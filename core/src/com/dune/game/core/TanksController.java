@@ -31,4 +31,17 @@ public class TanksController extends ObjectPool<Tank> {
         }
         checkPool();
     }
+
+    public void checkCollisions(float dt) {
+        int x = 1;
+        for (int i = 0; i < activeList.size(); i++) {
+            for (int j = x; j < activeList.size(); j++) {
+                if (Math.abs(activeList.get(i).getCellX() - activeList.get(j).getCellX()) <= 1 && Math.abs(activeList.get(i).getCellY() - activeList.get(j).getCellY()) <= 1) {
+                    activeList.get(i).obstacleDetour(activeList.get(j).position, dt);
+                    activeList.get(j).obstacleDetour(activeList.get(i).position, dt);
+                }
+            }
+            x++;
+        }
+    }
 }
