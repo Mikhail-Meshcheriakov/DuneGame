@@ -28,7 +28,8 @@ public class Projectile extends GameObject implements Poolable {
         this.speed = 640.0f;
     }
 
-    public void setup(Vector2 startPosition, float angle, TextureRegion texture) {
+    public void setup(Vector2 startPosition, float angle, TextureRegion texture, Owner ownerType) {
+        this.ownerType = ownerType;
         this.texture = texture;
         this.position.set(startPosition);
         this.angle = angle;

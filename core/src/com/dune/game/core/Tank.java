@@ -9,11 +9,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 public class Tank extends GameObject implements Poolable {
-    public enum Owner {
-        PLAYER, AI
-    }
-
-    private Owner ownerType;
     private Weapon weapon;
     private Vector2 destination;
     private TextureRegion[] textures;
@@ -49,10 +44,6 @@ public class Tank extends GameObject implements Poolable {
         if (stayStill) {
             destination.set(position);
         }
-    }
-
-    public Owner getOwnerType() {
-        return ownerType;
     }
 
     @Override
@@ -129,7 +120,7 @@ public class Tank extends GameObject implements Poolable {
             weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
             int power = weapon.use(dt);
             if (power > -1 && Math.abs(weapon.getAngle() - angleTo) < 3) {
-                gc.getProjectilesController().setup(tmp.set(target.position).sub(position).nor().scl(30).add(position), weapon.getAngle());
+                gc.getProjectilesController().setup(tmp.set(target.position).sub(position).nor().scl(30).add(position), weapon.getAngle(), getOwnerType());
             }
         }
         if (weapon.getType() == Weapon.Type.HARVEST) {

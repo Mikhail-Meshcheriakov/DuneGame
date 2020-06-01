@@ -19,6 +19,7 @@ public class GameController {
     private TanksController tanksController;
     private Vector2 tmp;
     private Vector2 selectionStart;
+    private boolean friendlyFire;
 
     private List<Tank> selectedUnits;
 
@@ -41,6 +42,7 @@ public class GameController {
     // Инициализация игровой логики
     public GameController() {
         Assets.getInstance().loadAssets();
+        this.friendlyFire = false;
         this.tmp = new Vector2();
         this.selectionStart = new Vector2();
         this.selectedUnits = new ArrayList<>();
@@ -86,9 +88,12 @@ public class GameController {
         for (int i = 0; i < tanksController.activeSize(); i++) {
             Tank t = tanksController.activeList.get(i);
             for (int j = 0; j < projectilesController.activeSize(); j++) {
-                if (t.getPosition().dst(projectilesController.activeList.get(j).getPosition()) < 30) {
-                    t.changeHP(-20);
-                    projectilesController.activeList.get(j).deactivate();
+                Projectile p = projectilesController.activeList.get(j);
+                if (t.getPosition().dst(p.getPosition()) < 30) {
+                    if (friendlyFire || t.getOwnerType() != p.getOwnerType()){
+                        t.changeHP(-20);
+                        p.deactivate();
+                    }
                 }
             }
         }
