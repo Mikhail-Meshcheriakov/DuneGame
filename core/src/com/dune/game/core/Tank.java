@@ -36,6 +36,10 @@ public class Tank extends GameObject implements Poolable {
         return weapon;
     }
 
+    public void targetReset() {
+        this.target = null;
+    }
+
     public void moveBy(Vector2 value) {
         boolean stayStill = false;
         if (position.dst(destination) < 3.0f) {
@@ -120,12 +124,12 @@ public class Tank extends GameObject implements Poolable {
     }
 
     public void updateWeapon(float dt) {
-        if (weapon.getType() == Weapon.Type.GROUND && target != null) {
+        if (weapon.getType() == Weapon.Type.GROUND && target != null && target.isActive()) {
             float angleTo = tmp.set(target.position).sub(position).angle();
             weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
             int power = weapon.use(dt);
-            if (power > -1) {
-                gc.getProjectilesController().setup(position, weapon.getAngle());
+            if (power > -1 && Math.abs(weapon.getAngle() - angleTo) < 3) {
+                gc.getProjectilesController().setup(tmp.set(target.position).sub(position).nor().scl(30).add(position), weapon.getAngle());
             }
         }
         if (weapon.getType() == Weapon.Type.HARVEST) {
@@ -171,6 +175,13 @@ public class Tank extends GameObject implements Poolable {
             batch.draw(progressbarTexture, position.x - 30, position.y + 32, 60 * weapon.getUsageTimePercentage(), 8);
             batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
+
+        batch.setColor(0.2f, 0.0f, 0.0f, 1.0f);
+        batch.draw(progressbarTexture, position.x - 32, position.y + 45, 64, 12);
+        batch.setColor(1.0f, 0.0f, 0.0f, 1.0f);
+        batch.draw(progressbarTexture, position.x - 30, position.y + 47, 60 * getHPPercentage(), 8);
+        batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+
     }
 
     public float rotateTo(float srcAngle, float angleTo, float rSpeed, float dt) {
@@ -188,5 +199,14 @@ public class Tank extends GameObject implements Poolable {
             srcAngle -= 360.0f;
         }
         return srcAngle;
+    }
+
+    public void changeHP(int value) {
+        hp += value;
+        if (hp > hpMax) hp = hpMax;
+    }
+
+    private float getHPPercentage() {
+        return (float) hp / (float) hpMax;
     }
 }

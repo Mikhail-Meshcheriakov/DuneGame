@@ -61,6 +61,7 @@ public class GameController {
         projectilesController.update(dt);
         map.update(dt);
         checkCollisions(dt);
+        checkDamage();
         // checkSelection();
     }
 
@@ -76,6 +77,18 @@ public class GameController {
                     t2.moveBy(tmp);
                     tmp.scl(-1);
                     t1.moveBy(tmp);
+                }
+            }
+        }
+    }
+
+    public void checkDamage() {
+        for (int i = 0; i < tanksController.activeSize(); i++) {
+            Tank t = tanksController.activeList.get(i);
+            for (int j = 0; j < projectilesController.activeSize(); j++) {
+                if (t.getPosition().dst(projectilesController.activeList.get(j).getPosition()) < 30) {
+                    t.changeHP(-20);
+                    projectilesController.activeList.get(j).deactivate();
                 }
             }
         }

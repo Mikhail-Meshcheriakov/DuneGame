@@ -61,6 +61,8 @@ public class TanksController extends ObjectPool<Tank> {
                     if (t.getWeapon().getType() == Weapon.Type.GROUND) {
                         Tank aiTank = gc.getTanksController().getNearestAiTank(tmp);
                         if (aiTank == null) {
+                            //Сбрасываем цель, иначе танк не принимает другие команды.
+                            t.targetReset();
                             t.commandMoveTo(tmp);
                         } else {
                             t.commandAttack(aiTank);
