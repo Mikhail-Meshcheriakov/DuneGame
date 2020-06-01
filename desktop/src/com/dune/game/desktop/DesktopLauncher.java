@@ -10,7 +10,6 @@ public class DesktopLauncher {
 		config.width = 1280;
 		config.height = 720;
 //		config.foregroundFPS = 1;
-		config.forceExit = false;
 		new LwjglApplication(new DuneGame(), config);
 	}
 }
