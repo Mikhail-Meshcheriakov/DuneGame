@@ -3,18 +3,9 @@ package com.dune.game.core;
 import com.badlogic.gdx.math.Vector2;
 
 public abstract class GameObject {
-    public enum Owner {
-        PLAYER, AI
-    }
-
-    protected Owner ownerType;
     protected GameController gc;
     protected Vector2 position;
     protected Vector2 tmp;
-
-    public Owner getOwnerType() {
-        return ownerType;
-    }
 
     public Vector2 getPosition() {
         return position;
