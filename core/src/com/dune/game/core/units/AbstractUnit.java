@@ -27,6 +27,7 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     protected int container;
     protected int containerCapacity;
 
+    protected boolean attacked;
     protected Targetable target;
     protected float minDstToActiveTarget;
 
@@ -74,6 +75,10 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
         return hp > 0;
     }
 
+    public boolean isAttacked() {
+        return attacked;
+    }
+
     public AbstractUnit(GameController gc) {
         super(gc);
         this.progressbarTexture = Assets.getInstance().getAtlas().findRegion("progressbar");
@@ -113,6 +118,9 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
 
     public void commandMoveTo(Vector2 point) {
         destination.set(point);
+        if (target != null) {
+            ((AbstractUnit) this.target).attacked = false;
+        }
         target = null;
     }
 

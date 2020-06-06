@@ -4,8 +4,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.dune.game.core.units.AbstractUnit;
 import com.dune.game.core.units.BattleTank;
 import com.dune.game.core.units.Harvester;
+import com.dune.game.core.units.UnitType;
 
 public class BattleMap {
     private class Cell {
@@ -13,10 +15,12 @@ public class BattleMap {
         private int resource;
         private float resourceRegenerationRate;
         private float resourceRegenerationTime;
+        private boolean block;
 
         public Cell(int cellX, int cellY) {
             this.cellX = cellX;
             this.cellY = cellY;
+            this.block = false;
             if (MathUtils.random() < 0.1f) {
                 resource = MathUtils.random(1, 3);
             }
@@ -58,11 +62,13 @@ public class BattleMap {
     public static final int ROWS_COUNT = 9;
     public static final int CELL_SIZE = 80;
 
+    private GameController gc;
     private TextureRegion grassTexture;
     private TextureRegion resourceTexture;
     private Cell[][] cells;
 
-    public BattleMap() {
+    public BattleMap(GameController gc) {
+        this.gc = gc;
         this.grassTexture = Assets.getInstance().getAtlas().findRegion("grass");
         this.resourceTexture = Assets.getInstance().getAtlas().findRegion("resource");
         this.cells = new Cell[COLUMNS_COUNT][ROWS_COUNT];
@@ -77,6 +83,23 @@ public class BattleMap {
         int cx = (int) (point.x / CELL_SIZE);
         int cy = (int) (point.y / CELL_SIZE);
         return cells[cx][cy].resource;
+    }
+
+
+    public Vector2 getNearestResourcePosition(AbstractUnit unit) {
+        float minDst = 1500;
+        Vector2 v = new Vector2();
+        for (int i = 0; i < COLUMNS_COUNT; i++) {
+            for (int j = 0; j < ROWS_COUNT; j++) {
+                if (cells[i][j].resource > 0 && (!cells[i][j].block || unit.getPosition().dst(i * 80 + 40, j * 80 + 40) < 30)) {
+                    if (unit.getPosition().dst(i * 80 + 40, j * 80 + 40) < minDst) {
+                        minDst = unit.getPosition().dst(i * 80 + 40, j * 80 + 40);
+                        v.set(i * 80 + 40, j * 80 + 40);
+                    }
+                }
+            }
+        }
+        return v;
     }
 
     public int harvestResource(Vector2 point, int power) {
@@ -105,8 +128,19 @@ public class BattleMap {
     public void update(float dt) {
         for (int i = 0; i < COLUMNS_COUNT; i++) {
             for (int j = 0; j < ROWS_COUNT; j++) {
+                cellBlocking(i, j);
                 cells[i][j].update(dt);
             }
+        }
+    }
+
+    private void cellBlocking(int cellX, int cellY) {
+        for (int k = 0; k < gc.getUnitsController().getUnits().size(); k++) {
+            if (gc.getUnitsController().getUnits().get(k).getUnitType() == UnitType.HARVESTER && gc.getUnitsController().getUnits().get(k).getPosition().dst(cellX * 80 + 40, cellY * 80 + 40) < 30) {
+                cells[cellX][cellY].block = true;
+                break;
+            }
+            cells[cellX][cellY].block = false;
         }
     }
 }
