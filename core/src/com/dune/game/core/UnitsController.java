@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.dune.game.core.units.AbstractUnit;
 import com.dune.game.core.units.BattleTank;
 import com.dune.game.core.units.Owner;
-import com.dune.game.core.units.UnitType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,33 +90,5 @@ public class UnitsController {
             }
         }
         return null;
-    }
-
-    public AbstractUnit getNearestUnit(AbstractUnit unit, UnitType unitType, Owner owner) {
-        float minDst = 1500;
-        AbstractUnit tmpU = null;
-        if (owner == Owner.AI) {
-            for (int i = 0; i < aiUnits.size(); i++) {
-                AbstractUnit u = aiUnits.get(i);
-                if (u.getUnitType() == unitType) {
-                    if (u.getPosition().dst(unit.getPosition()) < minDst && u.getPosition().dst(unit.getPosition()) > 30) {
-                        minDst = u.getPosition().dst(unit.getPosition());
-                        tmpU = u;
-                    }
-                }
-            }
-        }
-        if (owner == Owner.PLAYER) {
-            for (int i = 0; i < playerUnits.size(); i++) {
-                AbstractUnit u = playerUnits.get(i);
-                if (u.getUnitType() == unitType) {
-                    if (u.getPosition().dst(unit.getPosition()) < minDst && u.getPosition().dst(unit.getPosition()) > 30) {
-                        minDst = u.getPosition().dst(unit.getPosition());
-                        tmpU = u;
-                    }
-                }
-            }
-        }
-        return tmpU;
     }
 }

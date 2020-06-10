@@ -26,13 +26,11 @@ public class BattleTank extends AbstractUnit {
         this.ownerType = ownerType;
         this.hp = this.hpMax;
         this.destination = new Vector2(position);
-        this.attacked = false;
     }
 
     public void updateWeapon(float dt) {
         if (target != null) {
             if (!((AbstractUnit) target).isActive()) {
-                ((AbstractUnit) this.target).attacked = false;
                 target = null;
                 return;
             }
@@ -51,11 +49,7 @@ public class BattleTank extends AbstractUnit {
     @Override
     public void commandAttack(Targetable target) {
         if (target.getType() == TargetType.UNIT && ((AbstractUnit) target).getOwnerType() != this.ownerType) {
-            if (this.target != null) {
-                ((AbstractUnit) this.target).attacked = false;
-            }
             this.target = target;
-            ((AbstractUnit) this.target).attacked = true;
         } else {
             commandMoveTo(target.getPosition());
         }
