@@ -25,6 +25,10 @@ public class PlayerLogic {
         return unitsMaxCount;
     }
 
+    public void addMoney(int money) {
+        this.money += money;
+    }
+
     public PlayerLogic(GameController gc) {
         this.gc = gc;
         this.money = 1000;

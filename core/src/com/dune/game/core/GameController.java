@@ -3,6 +3,7 @@ package com.dune.game.core;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -76,6 +77,10 @@ public class GameController {
 
     public BattleMap getMap() {
         return map;
+    }
+
+    public PlayerLogic getPlayerLogic() {
+        return playerLogic;
     }
 
     public GameController() {

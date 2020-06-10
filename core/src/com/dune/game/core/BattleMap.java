@@ -62,17 +62,20 @@ public class BattleMap {
 
     private TextureRegion grassTexture;
     private TextureRegion resourceTexture;
+    private TextureRegion factory;
     private Cell[][] cells;
 
     public BattleMap() {
         this.grassTexture = Assets.getInstance().getAtlas().findRegion("grass");
         this.resourceTexture = Assets.getInstance().getAtlas().findRegion("resource");
+        this.factory = Assets.getInstance().getAtlas().findRegion("factory");
         this.cells = new Cell[COLUMNS_COUNT][ROWS_COUNT];
         for (int i = 0; i < COLUMNS_COUNT; i++) {
             for (int j = 0; j < ROWS_COUNT; j++) {
                 cells[i][j] = new Cell(i, j);
             }
         }
+        cells[1][1].resourceRegenerationRate = 0;
     }
 
     public int getResourceCount(Vector2 point) {
@@ -102,6 +105,7 @@ public class BattleMap {
                 cells[i][j].render(batch);
             }
         }
+        batch.draw(factory, 80, 80);
     }
 
     public void update(float dt) {
