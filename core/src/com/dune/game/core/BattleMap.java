@@ -6,6 +6,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dune.game.screens.utils.Assets;
 
+import java.util.ArrayList;
+
 public class BattleMap {
     private class Cell {
         private Building buildingEntrance;
@@ -126,6 +128,23 @@ public class BattleMap {
             cells[cx][cy].resource = 0;
         }
         return value;
+    }
+
+    public Vector2 getNearestResource(Vector2 position) {
+        Vector2 v = new Vector2();
+        float minDist = 100000.0f;
+        for (int i = 0; i < COLUMNS_COUNT; i++) {
+            for (int j = 0; j < ROWS_COUNT; j++) {
+                if (cells[i][j].resource > 0) {
+                    float currentDst = position.dst(i * CELL_SIZE + CELL_SIZE / 2, j * CELL_SIZE + CELL_SIZE / 2);
+                    if (currentDst < minDist) {
+                        v.set(i * CELL_SIZE + CELL_SIZE / 2, j * CELL_SIZE + CELL_SIZE / 2);
+                        minDist = currentDst;
+                    }
+                }
+            }
+        }
+        return v;
     }
 
     public void render(SpriteBatch batch) {

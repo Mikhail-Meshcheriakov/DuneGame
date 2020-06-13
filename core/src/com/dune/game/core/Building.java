@@ -36,6 +36,11 @@ public class Building extends GameObject implements Poolable {
         return ownerLogic;
     }
 
+    public Vector2 getPositionEntrance() {
+        tmp.set(position);
+        return tmp.add(0, -BattleMap.CELL_SIZE);
+    }
+
     public Building(GameController gc) {
         super(gc);
         this.texture = Assets.getInstance().getAtlas().findRegion("grass");
